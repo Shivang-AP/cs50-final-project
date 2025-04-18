@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion-Based Music Recommendation</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        #video { border: 5px solid #000; width: 50%; }
+        h2 { color: #333; }
+        #music-list { list-style: none; padding: 0; }
+        #music-list li { padding: 10px; background: #eee; margin: 5px; border-radius: 5px; }
+        #capture-btn { padding: 10px 20px; font-size: 16px; background-color: #28a745; color: white; border: none; cursor: pointer; }
+        #capture-btn:hover { background-color: #218838; }
+    </style>
+</head>
+<body>
+    <h1>Emotion-Based Music Recommendation</h1>
+    <img id="video" src="{{ url_for('video_feed') }}" alt="Emotion Detector">
+    <br><br>
+    <button id="capture-btn">Capture Emotion</button>
+    <h2>Detected Emotion: <span id="emotion">Press Capture</span></h2>
+    <h3>Music Recommendations:</h3>
+    <ul id="music-list"></ul>
+
+    <script>
+        document.getElementById("capture-btn").addEventListener("click", function() {
+            let video = document.getElementById("video");
+
+            // Create a canvas to capture the frame
+            let canvas = document.createElement("canvas");
+            canvas.width = video.width;
+            canvas.height = video.height;
+            let ctx = canvas.getContext("2d");
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            let imageData = canvas.toDataURL("image/jpeg");
+
+            fetch('/capture', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: imageData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("emotion").innerText = data.emotion;
+                let musicList = document.getElementById("music-list");
+                musicList.innerHTML = "";
+                data.music.forEach(song => {
+                    let li = document.createElement("li");
+                    li.innerText = song;
+                    musicList.appendChild(li);
+                });
+            })
+            .catch(error => console.error("Error capturing emotion:", error));
+        });
+    </script>
+</body>
+</html>
