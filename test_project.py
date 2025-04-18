@@ -11,3 +11,5 @@ def test_detect_faces_blank_image():
     faces = detect_faces(blank)
     assert isinstance(faces, (list, np.ndarray))
     assert len(faces) == 0
+ 
+ 
